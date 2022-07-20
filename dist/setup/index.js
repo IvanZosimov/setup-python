@@ -64869,12 +64869,12 @@ function useCpythonVersion(version, architecture, updateEnvironment) {
             core.exportVariable('Python3_ROOT_DIR', installDir);
             core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
             if (!utils_1.IS_LINUX && !utils_1.IS_WINDOWS) {
-                const libPath = process.env.DYLD_FALLBACK_LIBRARY_PATH
-                    ? `:${process.env.DYLD_FALLBACK_LIBRARY_PATH}`
+                const libPath = process.env.DYLD_LIBRARY_PATH
+                    ? `:${process.env.DYLD_LIBRARY_PATH}`
                     : '';
                 const pyLibPath = path.join(installDir, 'lib');
                 if (!libPath.split(':').includes(pyLibPath)) {
-                    core.exportVariable('DYLD_FALLBACK_LIBRARY_PATH', pyLibPath + libPath);
+                    core.exportVariable('DYLD_LIBRARY_PATH', pyLibPath + libPath);
                 }
             }
             if (utils_1.IS_LINUX) {

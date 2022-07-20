@@ -89,13 +89,13 @@ export async function useCpythonVersion(
     core.exportVariable('PKG_CONFIG_PATH', installDir + '/lib/pkgconfig');
 
     if (!IS_LINUX && !IS_WINDOWS) {
-      const libPath = process.env.DYLD_FALLBACK_LIBRARY_PATH
-        ? `:${process.env.DYLD_FALLBACK_LIBRARY_PATH}`
+      const libPath = process.env.DYLD_LIBRARY_PATH
+        ? `:${process.env.DYLD_LIBRARY_PATH}`
         : '';
       const pyLibPath = path.join(installDir, 'lib');
 
       if (!libPath.split(':').includes(pyLibPath)) {
-        core.exportVariable('DYLD_FALLBACK_LIBRARY_PATH', pyLibPath + libPath);
+        core.exportVariable('DYLD_LIBRARY_PATH', pyLibPath + libPath);
       }
     }
     
