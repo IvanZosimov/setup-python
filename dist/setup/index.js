@@ -65294,6 +65294,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const finder = __importStar(__nccwpck_require__(9996));
+const exec = __importStar(__nccwpck_require__(1514));
 const finderPyPy = __importStar(__nccwpck_require__(4003));
 const path = __importStar(__nccwpck_require__(1017));
 const os = __importStar(__nccwpck_require__(2037));
@@ -65364,13 +65365,21 @@ function run() {
                     pythonVersion = installed.version;
                     core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
                 }
-                const cache = core.getInput('cache');
-                if (cache && utils_1.isCacheFeatureAvailable()) {
-                    yield cacheDependencies(cache, pythonVersion);
-                }
             }
             else {
                 core.warning('The `python-version` input is not set.  The version of Python currently in `PATH` will be used.');
+            }
+            const cache = core.getInput('cache');
+            let { stdout, stderr, exitCode } = yield exec.getExecOutput("python", ["--version"], { ignoreReturnCode: true });
+            if (exitCode) {
+                stderr = !stderr.trim()
+                    ? `The python --version command failed with exit code: ${exitCode}`
+                    : stderr;
+                throw new Error(stderr);
+            }
+            let pythonVersion = stdout.trim().split(" ")[1];
+            if (cache && utils_1.isCacheFeatureAvailable()) {
+                yield cacheDependencies(cache, pythonVersion);
             }
             const matchersPath = path.join(__dirname, '../..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);

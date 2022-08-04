@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as finder from './find-python';
+import * as exec from '@actions/exec';
 import * as finderPyPy from './find-pypy';
 import * as path from 'path';
 import * as os from 'os';
@@ -104,15 +105,32 @@ async function run() {
         core.info(`Successfully set up ${installed.impl} (${pythonVersion})`);
       }
 
-      const cache = core.getInput('cache');
-      if (cache && isCacheFeatureAvailable()) {
-        await cacheDependencies(cache, pythonVersion);
-      }
-    } else {
+      } else {
       core.warning(
         'The `python-version` input is not set.  The version of Python currently in `PATH` will be used.'
       );
     }
+
+    const cache = core.getInput('cache');
+    let {stdout, stderr, exitCode} = await exec.getExecOutput(
+      "python",
+      ["--version"],
+      {ignoreReturnCode: true}
+    );
+  
+    if (exitCode) {
+      stderr = !stderr.trim()
+        ? `The python --version command failed with exit code: ${exitCode}`
+        : stderr;
+      throw new Error(stderr);
+    }
+  
+    let pythonVersion = stdout.trim().split(" ")[1];
+
+    if (cache && isCacheFeatureAvailable()) {
+      await cacheDependencies(cache, pythonVersion);
+    }
+
     const matchersPath = path.join(__dirname, '../..', '.github');
     core.info(`##[add-matcher]${path.join(matchersPath, 'python.json')}`);
   } catch (err) {
